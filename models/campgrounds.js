@@ -14,7 +14,7 @@ module.exports = mongoose.model('Campground', campgroundSchema)
 This method creates a Mongoose model based on a schema. A model is a class that allows you to interact with a MongoDB collection and perform CRUD operations 
 
     'Campground':
-This is the name of the model. Mongoose will automatically use this name to create a corresponding MongoDB collection named campgrounds (Mongoose pluralizes model names by default).
+Campground is the name of the model. Mongoose will automatically use this name to create a corresponding MongoDB collection named campgrounds (Mongoose pluralizes model names by default).
  
     campgroundSchema:
 This is the schema you’ve defined for the Campground model. A schema in Mongoose defines the structure of documents within a collection, including field names, types, and validation rules.
