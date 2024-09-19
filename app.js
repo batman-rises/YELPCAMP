@@ -4,6 +4,7 @@ const path = require('path')
 
 const methodOverride = require('method-override')
 
+//requiring and connecting MONGOOSE
 const mongoose = require('mongoose');
 const dbUrl = 'mongodb://localhost:27017/yelp-camp';//yelp-camp is name of DB
 
@@ -22,12 +23,19 @@ mongoose.connect(dbUrl)
 
 const Campground = require('./models/campgrounds')
 
+//requiring EJS-MATE
+const ejsMate = require('ejs-mate');
+
+
+
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));//tp execute EJS smoothly we need these two lines
+app.set('views', path.join(__dirname, 'views'));//to execute EJS smoothly we need these two lines
 
 app.use(express.urlencoded({ extended: true }));//parsing through url/ie tempating
 
 app.use(methodOverride('_method'));
+
+app.engine('ejs', ejsMate);
 
 
 app.get('/', (req, res) => {
