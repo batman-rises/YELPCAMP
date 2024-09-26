@@ -1,13 +1,37 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;// to avoid using mongoose.Schema repeatedly uk smartness
+const Review = require('./review');
 
 const campgroundSchema = new Schema({
     title: String,
     image: String,
     price: Number,
     description: String,
-    location: String
+    location: String,
+    reviews: [
+        {//one to many relationship ie a campground can have multiple reviews
+            type: Schema.Types.ObjectId,
+            ref: "Review"
+        }
+    ]
 })
+
+campgroundSchema.post('findOneAndDelete', async function (doc) {
+    if (doc) {
+        await Review.deleteMany({
+            _id: {
+                $in: doc.reviews
+            }
+        })
+    }
+})
+/**The campgroundSchema.post('findOneAndDelete') middleware is triggered after a campground is deleted. 
+ * It ensures that any reviews associated with the deleted campground are also removed. 
+ * When a campground is deleted using findOneAndDelete, the middleware checks if the deleted document (campground) 
+ * contains any reviews. If it does, it uses the Review.deleteMany method to delete all reviews 
+ * whose IDs are stored in the reviews array of the campground. 
+ * This approach automatically cleans up related reviews whenever a campground is removed from the database. */
+
 
 module.exports = mongoose.model('Campground', campgroundSchema)
 /**  
