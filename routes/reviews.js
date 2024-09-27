@@ -29,6 +29,7 @@ router.post('/', validateReview, catchAsync(async (req, res) => {
     campground.reviews.push(review);
     await review.save();
     await campground.save();
+    req.flash('success', 'Successfully created a new Review!');
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 /**This code handles a POST request to create a new review for a specific campground. 
@@ -43,6 +44,7 @@ router.delete('/:reviewId', catchAsync(async (req, res) => {
     //mongo operator $PULL
     await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
     await Review.findByIdAndDelete(reviewId)
+    req.flash('success', 'Successfully deleted Review!');
     res.redirect(`/campgrounds/${id}`)
 }))
 

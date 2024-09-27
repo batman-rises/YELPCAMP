@@ -33,7 +33,27 @@ const ExpressError = require('./utils/ExpressError')
 const campgrounds = require('./routes/campground')
 const reviews = require('./routes/reviews')
 
+const session = require('express-session')
+const flash = require('connect-flash')
 
+const sessionConfig = {
+    secret: 'asecret',
+    resave: false,
+    saveUninitialized: true,
+    //fancier options for cookies
+    cookie: {
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig))
+app.use(flash())
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 app.engine('ejs', ejsMate);//imp
 app.set('view engine', 'ejs');
@@ -51,10 +71,10 @@ app.use('/campgrounds/:id/reviews', reviews)
 
 
 
+
 app.get('/', (req, res) => {
     res.render('Home')
 })
-
 
 app.all(/(.*)/, (req, res, next) => {
     next(new ExpressError('Pg not found', 404))
