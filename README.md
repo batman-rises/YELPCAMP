@@ -5,3 +5,5 @@ Entries : 14/09 & 15/09 => CRUD
         : 21/09 => Errors & Validating Data
         : 26/09 => Added the Reviews Model
         : 27/09 => Restructured routes in app.js to a separate routes directory + added a public directory 
+        : 27/09 => Set Up Flash
+        
