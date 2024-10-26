@@ -1,5 +1,6 @@
 const Joi = require('joi');
-// JOI IS JS VALIDATOR
+// Joi is a popular JavaScript library used for data validation, allowing developers to define schemas 
+//for objects and ensure that the data adheres to specific rules.
 
 module.exports.campgroundSchema = Joi.object({
     campground: Joi.object({

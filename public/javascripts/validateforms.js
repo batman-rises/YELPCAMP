@@ -1,4 +1,4 @@
-////bootstrap validation : prevents from submitting the file
+////bootstrap validation : prevents from submitting the file with errors
 
 (() => {
     'use strict'

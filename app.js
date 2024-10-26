@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const path = require('path')
 const methodOverride = require('method-override')
+
 //requiring and connecting MONGOOSE
 const mongoose = require('mongoose');
 const dbUrl = 'mongodb://localhost:27017/yelp-camp';//yelp-camp is name of DB

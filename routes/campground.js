@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
 const catchAsync = require('../utils/catchAsync')
 const ExpressError = require('../utils/ExpressError')
+
 const Campground = require('../models/campgrounds')
 //KEY NOTE: MESSING UP WITH PATH IS A PROBLEM HERE WHILE RESTRUCTURING 
 const { campgroundSchema } = require('../schemas.js')
@@ -11,7 +13,7 @@ const validateCampground = (req, res, next) => {
 
     const { error } = campgroundSchema.validate(req.body);
     if (error) {
-        const mssg = error.details.map(el => el.message).join(',')
+        const mssg = error.details.map(el => el.message).join(',')//ye bhi ratt lio server side(joi) validations
         throw new ExpressError(mssg, 400)
     } else {
         next()
