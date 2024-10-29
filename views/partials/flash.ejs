@@ -1,4 +1,4 @@
-<% if(success && success.length) {%>
+<% if(success && success.length) {%><!--IF SUCCESS IS THERE AND ITS NOT EMPTY-->
     <!--from bootstrap  docs-->
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <%= success %>
@@ -8,7 +8,7 @@
     <% } %>
 
 
-        <% if(error && error.length) {%>
+<% if(error && error.length) {%>
             <!--from bootstrap  docs-->
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <%= error %>

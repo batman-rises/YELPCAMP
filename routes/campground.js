@@ -9,6 +9,8 @@ const Campground = require('../models/campgrounds')
 const { campgroundSchema } = require('../schemas.js')
 
 
+const {isLoggedIn}=require('../middleware')
+
 const validateCampground = (req, res, next) => {
 
     const { error } = campgroundSchema.validate(req.body);
@@ -37,10 +39,10 @@ router.get('/', catchAsync(async (req, res) => {//-> '/campgrounds' ye waala jo 
 /**The GET /campgrounds/new route shows a form to create a new campground.
 The POST /campgrounds route handles form submissions, creates a new campground using the submitted data, 
 saves it to the database, and then redirects the user to the details page of the newly created campground. */
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
     res.render('campgrounds/new')
 })
-router.post('/', validateCampground, catchAsync(async (req, res) => {
+router.post('/', isLoggedIn,validateCampground, catchAsync(async (req, res) => {
     //if (!req.body.campground) throw new ExpressError('invalid campground data', 400)
     //this is not a mongoose schema but a schema meant for validation in the server side
     const campground = new Campground(req.body.campground)//kyunki agar html form ko dhyaan se dekhega to assume karega ki apan saara data campground[] me rakha hai
@@ -50,7 +52,7 @@ router.post('/', validateCampground, catchAsync(async (req, res) => {
 
 }))
 //Campground SHOW~details pg for each camp
-router.get('/:id', catchAsync(async (req, res) => {
+router.get('/:id', isLoggedIn, catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id).populate('reviews');
     if (!campground) {
         req.flash('error', 'cannot find that campground')
@@ -59,22 +61,22 @@ router.get('/:id', catchAsync(async (req, res) => {
     res.render('campgrounds/show', { campground });
 }))
 //Campground Edit & Update
-router.get('/:id/edit', catchAsync(async (req, res) => {
+router.get('/:id/edit', isLoggedIn,catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
-    if (!campground) {
+    if (!campground) { //if campgroung not found flash this error mssg
         req.flash('error', 'cannot find that campground')
         return res.redirect('/campgrounds')
     }
     res.render('campgrounds/edit', { campground });
 }))
-router.put('/:id', validateCampground, catchAsync(async (req, res) => {
+router.put('/:id', isLoggedIn,validateCampground, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });//spread operator
     req.flash('success', 'Successfully updated campground!');
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 //Campground Delete
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', isLoggedIn,async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     req.flash('success', 'Successfully deleted campground!');

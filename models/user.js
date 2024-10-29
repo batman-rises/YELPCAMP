@@ -12,6 +12,6 @@ const UserSchema = new Schema({
     }
 });
 
-UserSchema.plugin(passportLocalMongoose);//imp
+UserSchema.plugin(passportLocalMongoose);//imp~crucial~does all the basic works regarding auth like username,passport,salting etc etc
 
 module.exports = mongoose.model('User', UserSchema);

@@ -61,8 +61,9 @@ passport.use(new LocalStrategy(User.authenticate()))//we r saying PASSPORT, pls 
 passport.serializeUser(User.serializeUser());//storing user in the session
 passport.deserializeUser(User.deserializeUser());//how the user is getting out of the session
 
-//flash mssgs
+//flash mssgs+ global usage
 app.use((req, res, next) => {
+    res.locals.currentUser=req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
