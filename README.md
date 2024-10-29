@@ -6,4 +6,5 @@ Entries : 14/09 & 15/09 => CRUD
         : 26/09 => Added the Reviews Model
         : 27/09 => Restructured routes in app.js to a separate routes directory + added a public directory 
         : 27/09 => Set Up Flash
-        
+        //1 month gap :"(
+        : 29/10 => AUTH added (using Passport)
