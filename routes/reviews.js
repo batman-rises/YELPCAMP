@@ -10,22 +10,14 @@ const ExpressError = require('../utils/ExpressError')
 const { reviewSchema } = require('../schemas.js')
 
 
-const validateReview = (req, res, next) => {
-
-    const { error } = reviewSchema.validate(req.body);
-    if (error) {
-        const mssg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(mssg, 400)
-    } else {
-        next()
-    }
-}
+const {validateReview,isLoggedIn,isReviewAuthor} = require('../middleware.js')
 
 
 //REVIEWS:-
-router.post('/', validateReview, catchAsync(async (req, res) => {
+router.post('/', isLoggedIn,validateReview, catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review);
+    review.author=req.user._id;
     campground.reviews.push(review);
     await review.save();
     await campground.save();
@@ -39,7 +31,7 @@ router.post('/', validateReview, catchAsync(async (req, res) => {
  * After saving both the review and the updated campground to the database, 
  * it redirects the user to the campground's page using the campground's ID.
  */
-router.delete('/:reviewId', catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn,isReviewAuthor,catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     //mongo operator $PULL
     await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
