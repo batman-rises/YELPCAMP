@@ -7,4 +7,5 @@ Entries : 14/09 & 15/09 => CRUD
         : 27/09 => Restructured routes in app.js to a separate routes directory + added a public directory 
         : 27/09 => Set Up Flash
         //1 month gap :"(
-        : 29/10 => AUTH added (using Passport)
+        : 29/10 => Authentication added (using Passport)
+        : 31/10 => Authorization added
