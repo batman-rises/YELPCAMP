@@ -1,93 +1,52 @@
 const express = require('express');
 const router = express.Router();
-
 const catchAsync = require('../utils/catchAsync')
 const ExpressError = require('../utils/ExpressError')
-
 const Campground = require('../models/campgrounds')
 //KEY NOTE: MESSING UP WITH PATH IS A PROBLEM HERE WHILE RESTRUCTURING 
 const { campgroundSchema } = require('../schemas.js')
-
-
 const {isLoggedIn,isAuthor,validateCampground}=require('../middleware')
+const campgrounds=require('../controllers/campgrounds')
 
-
-
-
-
-//Campground is the name of the model
+/*Campground is the name of the model
 //campground INDEX:-
-router.get('/', catchAsync(async (req, res) => {//-> '/campgrounds' ye waala jo hai wo url me hota hai
-    const campgrounds = await Campground.find({});
-    //res.render('campgrounds/index') here i just grabbed it
-    res.render('campgrounds/index', { campgrounds })//grabbed + rendered
-}))
+router.get('/', catchAsync(campgrounds.index))
+
 //Campground New & Create   ~~~order does matter
-
-/**The GET /campgrounds/new route shows a form to create a new campground.
+The GET /campgrounds/new route shows a form to create a new campground.
 The POST /campgrounds route handles form submissions, creates a new campground using the submitted data, 
-saves it to the database, and then redirects the user to the details page of the newly created campground. */
-router.get('/new', isLoggedIn, (req, res) => {
-    res.render('campgrounds/new')
-})
-router.post('/', isLoggedIn,validateCampground, catchAsync(async (req, res) => {
-    //if (!req.body.campground) throw new ExpressError('invalid campground data', 400)
-    //this is not a mongoose schema but a schema meant for validation in the server side
-    const campground = new Campground(req.body.campground)//kyunki agar html form ko dhyaan se dekhega to assume karega ki apan saara data campground[] me rakha hai
-    campground.author=req.user._id;
-    await campground.save();
-    req.flash('success', 'Successfully created a new campground!');
-    res.redirect(`/campgrounds/${campground._id}`)
+saves it to the database, and then redirects the user to the details page of the newly created campground. 
+router.get('/new', isLoggedIn, campgrounds.renderNewForm )
+router.post('/', isLoggedIn,validateCampground, catchAsync(campgrounds.createCampground))
 
-}))
 //Campground SHOW~details pg for each camp
-router.get('/:id', isLoggedIn, catchAsync(async (req, res) => {
-    // basicaly we r saying that that we are populating all the reviews from the review array on the one campground
-           //then for each review populate the author of that particular review
-//then at the end, populate the author of tha campground seperately
-    
-
-const campground = await Campground.findById(req.params.id)
-    .populate({
-        path: 'reviews',
-        populate: { path: 'author' }  // Populate each review's author field
-    })
-    .populate('author');  // Populate the campground's author field directly
-
-    
-console.log("Campground data:", campground); // Check populated data
-
-    if (!campground) {
-        req.flash('error', 'cannot find that campground')
-        return res.redirect('/campgrounds')
-    }
-    res.render('campgrounds/show', { campground });
-}))
+router.get('/:id', isLoggedIn, catchAsync(campgrounds.showCampground))
 //Campground Edit & Update
-router.get('/:id/edit', isLoggedIn,isAuthor,catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(req.params.id);
-    if (!campground) { //if campgroung not found flash this error mssg
-        req.flash('error', 'cannot find that campground')
-        return res.redirect('/campgrounds')
-    }
-    
-
-    res.render('campgrounds/edit', { campground });
-}))
+router.get('/:id/edit', isLoggedIn,isAuthor,catchAsync(campgrounds.renderEditForm))
 //update
-router.put('/:id', isLoggedIn,isAuthor,validateCampground, catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });//spread operator
-    req.flash('success', 'Successfully updated campground!');
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
+router.put('/:id', isLoggedIn,isAuthor,validateCampground, catchAsync(campgrounds.updateCampground))
 //Campground Delete
-router.delete('/:id', isLoggedIn,isAuthor,async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    req.flash('success', 'Successfully deleted campground!');
-    res.redirect('/campgrounds')
-})
+router.delete('/:id', isLoggedIn,isAuthor,campgrounds.deleteCampground)
+**/
+
+
+router.route('/')
+    .get(catchAsync(campgrounds.index))
+    .post(isLoggedIn,validateCampground, catchAsync(campgrounds.createCampground))
+
+//order matters new should be before show pg route
+router.get('/new', isLoggedIn, campgrounds.renderNewForm )
+
+router.route('/:id')
+    .get(isLoggedIn, catchAsync(campgrounds.showCampground))
+    .put(isLoggedIn,isAuthor,validateCampground, catchAsync(campgrounds.updateCampground))
+    .delete(isLoggedIn,isAuthor,campgrounds.deleteCampground)
+
+router.get('/:id/edit', isLoggedIn,isAuthor,catchAsync(campgrounds.renderEditForm))
+
+
+
+
+
 
 module.exports = router;

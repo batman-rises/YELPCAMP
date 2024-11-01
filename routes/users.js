@@ -10,47 +10,16 @@ const { storeReturnTo } = require('../middleware');
 
 const passport=require('passport')
 
-router.get('/register', (req, res) => {
-    res.render('users/register')
-})
-router.post('/register', catchAsync(async (req, res) => {
-    try {//gpt it for summary
-        const { email, username, password } = req.body;
-        const user = new User({ email, username })
-        const registeredUser = await User.register(user, password);
+const users  = require('../controllers/users')
 
-        req.login(registeredUser,err=>{//passport's inbuilt method to automatically login a newly registered user
-            if(err) return next(err);// also it has to have a callback which is an err function similar to logout method.
+router.route('/register')
+    .get(users.renderRegisterUser)
+    .post(catchAsync(users.register));
 
-            req.flash('success', 'Welcome to Yelp-Camp');
-            res.redirect('/campgrounds');
-        })
+router.route('/login')
+    .get(users.renderLogin)
+    .post(storeReturnTo,passport.authenticate('local',{failureFlash:true , failureRedirect:'/login' }),users.login)
 
-    } catch (e) {
-        req.flash('error', e.message);
-        res.redirect('register')
-    }
-}));
-
-router.get('/login', (req, res) => {
-    res.render('users/login')
-})
-
-router.post('/login',storeReturnTo,passport.authenticate('local',{failureFlash:true , failureRedirect:'/login' }),(req,res)=>{
-    req.flash('success','welcome back');
-    const redirectURL=req.session.returnTo || '/campgrounds'; // search on this code piece...
-    delete req.session.returnTo;
-    res.redirect(redirectURL)
-})
-
-router.get('/logout', (req, res, next) => {
-    req.logout(function (err) {
-        if (err) {
-            return next(err);
-        }
-        req.flash('success', 'Goodbye!');
-        res.redirect('/campgrounds');
-    });
-}); 
+router.get('/logout', users.logout); 
 
 module.exports = router;
