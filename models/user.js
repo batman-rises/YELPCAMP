@@ -1,9 +1,7 @@
-// gonna use Passport for authentication
-//npm i passport passport-local passport-local-mongoose
-
-const mongoose = require('mongoose')
-const passportLocalMongoose = require('passport-local-mongoose');
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const passportLocalMongoose = require('passport-local-mongoose');
+
 const UserSchema = new Schema({
     email: {
         type: String,
@@ -12,6 +10,6 @@ const UserSchema = new Schema({
     }
 });
 
-UserSchema.plugin(passportLocalMongoose);//imp~crucial~does all the basic works regarding auth like username,passport,salting etc etc
+UserSchema.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model('User', UserSchema);
