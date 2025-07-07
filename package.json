@@ -45,7 +45,6 @@
     "concat-stream": "^1.6.2",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^4.6.0",
-    "connect-mongodb-session": "^3.1.1",
     "content-disposition": "^0.5.3",
     "content-type": "^1.0.4",
     "cookie": "^0.4.0",
