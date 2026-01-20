@@ -1,3 +1,5 @@
+app.set("trust proxy", 1);
+
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
@@ -49,7 +51,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(
   mongoSanitize({
     replaceWith: "_",
-  })
+  }),
 );
 
 const secret = process.env.SECRET || "thisshouldbeabettersecret!";
@@ -74,7 +76,7 @@ const sessionConfig = {
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
-    // secure: true,
+    secure: process.env.NODE_ENV === "production",
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
@@ -125,7 +127,7 @@ app.use(
       ],
       fontSrc: ["'self'", ...fontSrcUrls],
     },
-  })
+  }),
 );
 
 app.use(passport.initialize());
