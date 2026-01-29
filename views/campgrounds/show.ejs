@@ -1,5 +1,11 @@
 <% layout('layouts/boilerplate')%>
 <link rel="stylesheet" href="/stylesheets/stars.css">
+<h5>Why camp here?</h5>
+<ul>
+  <li>Scenic natural surroundings</li>
+  <li>Low crowd density</li>
+  <li>Ideal for weekend escapes</li>
+</ul>
 <div class="row">
     <div class="col-6">
         <div id="campgroundCarousel" class="carousel slide" data-ride="carousel">
@@ -31,7 +37,7 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-muted"><%= campground.location%></li>
                 <li class="list-group-item">Submitted by <%= campground.author.username%></li>
-                <li class="list-group-item">$<%= campground.price%>/night</li>
+                <li class="list-group-item">₹<%= campground.price%>/night</li>
             </ul>
             <%  if( currentUser && campground.author.equals(currentUser._id))  {%>
             <div class="card-body">

@@ -25,7 +25,11 @@ module.exports.index = async (req, res) => {
     })),
   };
 
-  res.render("campgrounds/index", { campgrounds, geoJSON });
+  res.render("campgrounds/index", {
+    campgrounds,
+    geoJSON,
+    title: "Camping Sites Across India | LetsCamp",
+  });
 };
 
 module.exports.renderNewForm = (req, res) => {
