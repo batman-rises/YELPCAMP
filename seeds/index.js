@@ -1,61 +1,43 @@
-const mongoose = require("mongoose");
-const cities = require("./cities");
-const { places, descriptors } = require("./seedHelpers");
-const Campground = require("../models/campground");
 require("dotenv").config();
 
-require("dotenv").config();
+const mongoose = require("mongoose");
+const Campground = require("../models/campground");
+const indianCamps = require("./indiaCampData");
 
 const dbUrl = process.env.DB_URL;
-//mongodb+srv://pbinayak604:QIoG297TeOlhyOFN@yelpcamp.ihh7wkm.mongodb.net/?retryWrites=true&w=majority&appName=yelpcamp
+
+console.log("SEED CONNECTING TO:", dbUrl);
 
 mongoose.connect(dbUrl, {
   useNewUrlParser: true,
-  // useCreateIndex: true,
   useUnifiedTopology: true,
-  // useFindAndModify: false
 });
-
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "connection error:"));
-db.once("open", () => {
-  console.log("Database connected");
-});
-
-const sample = (array) => array[Math.floor(Math.random() * array.length)];
 
 const seedDB = async () => {
   await Campground.deleteMany({});
-  for (let i = 0; i < 300; i++) {
-    const random1000 = Math.floor(Math.random() * 1000);
-    const price = Math.floor(Math.random() * 20) + 10;
-    const camp = new Campground({
-      //YOUR USER ID
-      author: "5f5c330c2cd79d538f2c66d9",
-      location: `${cities[random1000].city}, ${cities[random1000].state}`,
-      title: `${sample(descriptors)} ${sample(places)}`,
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam dolores vero perferendis laudantium, consequuntur voluptatibus nulla architecto, sit soluta esse iure sed labore ipsam a cum nihil atque molestiae deserunt!",
-      price,
+  console.log("Deleted old campgrounds");
+
+  for (let camp of indianCamps) {
+    const campground = new Campground({
+      title: camp.title,
+      location: camp.location,
+      description: camp.description,
+      price: camp.price,
       geometry: {
         type: "Point",
-        coordinates: [
-          cities[random1000].longitude,
-          cities[random1000].latitude,
-        ],
+        coordinates: camp.coordinates,
       },
       images: [
         {
-          url: "https://res.cloudinary.com/douqbebwk/image/upload/v1600060601/YelpCamp/ahfnenvca4tha00h2ubt.png",
-          filename: "YelpCamp/ahfnenvca4tha00h2ubt",
-        },
-        {
-          url: "https://res.cloudinary.com/douqbebwk/image/upload/v1600060601/YelpCamp/ruyoaxgf72nzpi4y6cdi.png",
-          filename: "YelpCamp/ruyoaxgf72nzpi4y6cdi",
+          url: "https://res.cloudinary.com/demo/image/upload/v1699999999/placeholder.jpg",
+          filename: "placeholder",
         },
       ],
+      author: "696fcec729ddc973500e8f1c",
     });
-    await camp.save();
+
+    await campground.save();
+    console.log("Saved:", campground.title);
   }
 };
 
