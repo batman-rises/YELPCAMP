@@ -6,6 +6,21 @@
   <li>Low crowd density</li>
   <li>Ideal for weekend escapes</li>
 </ul>
+<% if (currentUser) { %>
+  <form action="/campgrounds/<%= campground._id %>/favorite" method="POST">
+    <button class="btn btn-outline-danger btn-sm">
+      <% if (currentUser.favorites && currentUser.favorites.includes(campground._id)) { %>
+        ❤️ Saved
+      <% } else { %>
+        🤍 Add to Favorites
+      <% } %>
+    </button>
+  </form>
+<% } else { %>
+  <a href="/login" class="btn btn-outline-danger btn-sm">
+    🤍 Login to save
+  </a>
+<% } %>
 <div class="row">
     <div class="col-6">
         <div id="campgroundCarousel" class="carousel slide" data-ride="carousel">

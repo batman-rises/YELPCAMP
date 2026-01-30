@@ -21,7 +21,7 @@ const MongoStore = require("connect-mongo");
 const userRoutes = require("./routes/users");
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
-
+const favoriteRoutes = require("./routes/favorites");
 const dbUrl = process.env.DB_URL;
 
 mongoose.connect(dbUrl, {
@@ -147,6 +147,19 @@ app.use((req, res, next) => {
 app.use("/", userRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/reviews", reviewRoutes);
+app.use(favoriteRoutes);
+
+app.use(async (req, res, next) => {
+  if (req.user) {
+    const freshUser = await User.findById(req.user._id).populate("favorites");
+    res.locals.currentUser = freshUser;
+  } else {
+    res.locals.currentUser = null;
+  }
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 app.get("/", (req, res) => {
   res.render("home");
