@@ -1,9 +1,18 @@
 mapboxgl.accessToken = mapToken;
+
 const map = new mapboxgl.Map({
   container: "cluster-map",
-  style: "mapbox://styles/mapbox/light-v10",
-  center: [78.9629, 20.5937], // 🇮🇳 India center
+  style: "mapbox://styles/mapbox/outdoors-v12",
+
+  // 🇮🇳 INDIA CENTER
+  center: [78.9629, 20.5937], // Longitude, Latitude
   zoom: 4,
+
+  // Prevent useless panning (optional but pro)
+  maxBounds: [
+    [60, 5], // Southwest (Arabian Sea)
+    [100, 38], // Northeast (NE India)
+  ],
 });
 
 map.addControl(new mapboxgl.NavigationControl());
@@ -64,8 +73,16 @@ map.on("load", function () {
     source: "campgrounds",
     filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-color": "#11b4da",
-      "circle-radius": 4,
+      "circle-color": [
+        "step",
+        ["get", "price"],
+        "#4CAF50", // cheap
+        1000,
+        "#FFC107", // mid
+        2000,
+        "#F44336", // expensive
+      ],
+      "circle-radius": 6,
       "circle-stroke-width": 1,
       "circle-stroke-color": "#fff",
     },
@@ -84,7 +101,7 @@ map.on("load", function () {
 
         map.easeTo({
           center: features[0].geometry.coordinates,
-          zoom: zoom,
+          zoom: Math.max(zoom, 6),
         });
       });
   });
@@ -104,7 +121,10 @@ map.on("load", function () {
       coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
     }
 
-    new mapboxgl.Popup().setLngLat(coordinates).setHTML(popUpMarkup).addTo(map);
+    new mapboxgl.Popup({ offset: 25, closeButton: false })
+      .setLngLat(coordinates)
+      .setHTML(popUpMarkup)
+      .addTo(map);
   });
 
   map.on("mouseenter", "clusters", function () {
