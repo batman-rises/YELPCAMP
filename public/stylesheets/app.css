@@ -224,3 +224,16 @@ h3,
 textarea.form-control {
   border-radius: var(--radius-md);
 }
+
+/* FILTER PANEL */
+.filter-panel {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.campground-card img {
+  object-fit: cover;
+  height: 100%;
+}

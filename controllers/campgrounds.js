@@ -5,7 +5,26 @@ const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 const { cloudinary } = require("../cloudinary");
 
 module.exports.index = async (req, res) => {
-  const campgrounds = await Campground.find({});
+  const { search, minPrice, maxPrice } = req.query;
+
+  let query = {};
+
+  //  SEARCH (title + location)
+  if (search) {
+    query.$or = [
+      { title: new RegExp(search, "i") },
+      { location: new RegExp(search, "i") },
+    ];
+  }
+
+  // PRICE FILTER
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  const campgrounds = await Campground.find(query);
 
   const geoJSON = {
     type: "FeatureCollection",
@@ -28,7 +47,9 @@ module.exports.index = async (req, res) => {
   res.render("campgrounds/index", {
     campgrounds,
     geoJSON,
-    title: "Camping Sites Across India | LetsCamp",
+    search,
+    minPrice,
+    maxPrice,
   });
 };
 
