@@ -195,6 +195,7 @@
     "random-bytes": "^1.0.0",
     "range-parser": "^1.2.1",
     "raw-body": "^2.4.0",
+    "razorpay": "^2.9.6",
     "read-pkg": "^5.2.0",
     "read-pkg-up": "^7.0.1",
     "readable-stream": "^2.3.7",

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { MapPin, User, Heart, HeartOff, Edit, Trash2, AlertTriangle } from 'lucide-react'
+import { MapPin, User, Heart, HeartOff, Edit, Trash2, AlertTriangle, CalendarDays } from 'lucide-react'
 import api from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -20,6 +20,13 @@ export default function CampgroundShow() {
   const [deleting, setDeleting]         = useState(false)
   const [favLoading, setFavLoading]     = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // Booking state
+  const today = new Date().toISOString().split('T')[0]
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const [checkIn, setCheckIn]   = useState(today)
+  const [checkOut, setCheckOut] = useState(tomorrow)
+  const [booking, setBooking]   = useState(false) // loading state
 
   useEffect(() => {
     api.get(`/campgrounds/${id}`)
@@ -62,6 +69,68 @@ export default function CampgroundShow() {
       setDeleting(false)
     }
   }
+
+  // ── Razorpay booking ──────────────────────────────────────────────────────
+  const handleBooking = async () => {
+    if (!currentUser) return navigate('/login')
+    if (!checkIn || !checkOut || checkIn >= checkOut) {
+      addToast('Please select valid check-in and check-out dates', 'error')
+      return
+    }
+    setBooking(true)
+    try {
+      // 1. Create order on backend
+      const { data } = await api.post('/api/payment/create-order', {
+        campgroundId: id,
+        checkIn,
+        checkOut,
+      })
+
+      // 2. Open Razorpay checkout popup
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'LetsCamp',
+        description: `Booking: ${data.campgroundTitle} · ${data.nights} night${data.nights > 1 ? 's' : ''}`,
+        order_id: data.orderId,
+        handler: async (response) => {
+          // 3. Verify payment on backend
+          const verify = await api.post('/api/payment/verify', {
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            bookingId:           data.bookingId,
+          })
+          if (verify.data.success) {
+            addToast('🎉 Booking confirmed! See you at the campsite!', 'success')
+          }
+        },
+        prefill: {
+          name:  currentUser.username,
+          email: currentUser.email,
+        },
+        theme: { color: '#2d6a4f' },
+        modal: {
+          ondismiss: () => {
+            addToast('Payment cancelled', 'error')
+            setBooking(false)
+          }
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+    } catch (err) {
+      addToast(err?.response?.data?.message || 'Booking failed', 'error')
+    } finally {
+      setBooking(false)
+    }
+  }
+
+  const nights = checkIn && checkOut
+    ? Math.max(0, Math.ceil((new Date(checkOut) - new Date(checkIn)) / 86400000))
+    : 1
 
   const avgRating = campground?.reviews?.length
     ? (campground.reviews.reduce((sum, r) => sum + r.rating, 0) / campground.reviews.length)
@@ -158,7 +227,7 @@ export default function CampgroundShow() {
         {/* Right — price + map */}
         <div className="lg:col-span-2 flex flex-col gap-5">
 
-          {/* Price card */}
+          {/* Price + Booking card */}
           <div className="bg-white rounded-2xl border border-[#e3dfd7] p-6 shadow-card sticky top-24">
             <div className="flex items-baseline gap-1 mb-1">
               <span className="font-display text-3xl text-forest-800">
@@ -167,18 +236,62 @@ export default function CampgroundShow() {
               <span className="text-gray-400 text-sm">/ night</span>
             </div>
             {avgRating && (
-              <div className="flex items-center gap-2 mb-5">
+              <div className="flex items-center gap-2 mb-4">
                 <StarDisplay rating={avgRating} size={14} />
                 <span className="text-sm text-gray-500">{avgRating.toFixed(1)} · {campground.reviews?.length} review{campground.reviews?.length !== 1 ? 's' : ''}</span>
               </div>
             )}
-            <div className="h-px bg-[#e3dfd7] my-4" />
-            <div className="text-sm text-gray-500 space-y-2">
-              <div className="flex justify-between">
-                <span>₹{campground.price?.toLocaleString('en-IN')} × 1 night</span>
-                <span className="text-forest-800 font-medium">₹{campground.price?.toLocaleString('en-IN')}</span>
+
+            {/* Date pickers */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Check-in</label>
+                <input
+                  type="date"
+                  value={checkIn}
+                  min={today}
+                  onChange={e => setCheckIn(e.target.value)}
+                  className="w-full border border-[#e3dfd7] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-forest-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Check-out</label>
+                <input
+                  type="date"
+                  value={checkOut}
+                  min={checkIn || today}
+                  onChange={e => setCheckOut(e.target.value)}
+                  className="w-full border border-[#e3dfd7] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-forest-500"
+                />
               </div>
             </div>
+
+            <div className="h-px bg-[#e3dfd7] my-3" />
+
+            {/* Price breakdown */}
+            <div className="text-sm text-gray-500 space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span>₹{campground.price?.toLocaleString('en-IN')} × {nights} night{nights !== 1 ? 's' : ''}</span>
+                <span className="text-forest-800 font-medium">₹{(campground.price * nights)?.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>Platform booking fee</span>
+                <span>₹1</span>
+              </div>
+            </div>
+
+            {/* Book Now button */}
+            <button
+              onClick={handleBooking}
+              disabled={booking}
+              className="w-full bg-forest-700 hover:bg-forest-800 text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <CalendarDays size={16} />
+              {booking ? 'Processing...' : 'Book Now · Pay ₹1'}
+            </button>
+            <p className="text-xs text-gray-400 text-center mt-2">
+              Pay ₹1 platform fee to confirm your booking
+            </p>
           </div>
 
           {/* Map */}

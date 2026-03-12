@@ -8,6 +8,11 @@ const UserSchema = new Schema({
     required: true,
     unique: true,
   },
+  role: {
+    type: String,
+    enum: ["tourist", "owner", "admin"],
+    default: "tourist",
+  },
   favorites: [
     {
       type: Schema.Types.ObjectId,

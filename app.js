@@ -23,6 +23,7 @@ const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
 const favoriteRoutes = require("./routes/favorites");
 const aiRoutes = require("./routes/ai");
+const paymentRoutes = require("./routes/payment");
 // ─── Database ────────────────────────────────────────────────────────────────
 const dbUrl = process.env.DB_URL;
 
@@ -200,6 +201,7 @@ app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use(favoriteRoutes);
 app.use(aiRoutes);
+app.use(paymentRoutes);
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────
 app.all("*", (req, res, next) => {

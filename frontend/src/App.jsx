@@ -10,6 +10,7 @@ import CampgroundEdit from './pages/CampgroundEdit'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import FavoritesPage from './pages/FavoritesPage'
+import MyBookingsPage from './pages/MyBookingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
@@ -32,6 +33,9 @@ export default function App() {
             <Route path="register" element={<RegisterPage />} />
             <Route path="favorites" element={
               <ProtectedRoute><FavoritesPage /></ProtectedRoute>
+            } />
+            <Route path="my-bookings" element={
+              <ProtectedRoute><MyBookingsPage /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

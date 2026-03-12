@@ -64,3 +64,12 @@ Return only the description text, no quotes, no labels, no markdown.`,
 });
 
 module.exports = router;
+
+/**Grok API error: {
+  code: 'Client specified an invalid argument',
+  error: 'Incorrect API key provided: un***ed. You can obtain an API key from https://console.x.ai.'
+}
+Grok API error: {
+  code: 'Client specified an invalid argument',
+  error: 'Incorrect API key provided: un***ed. You can obtain an API key from https://console.x.ai.'
+} */

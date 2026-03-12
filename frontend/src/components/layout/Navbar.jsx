@@ -10,6 +10,7 @@ import {
   UserPlus,
   MapPin,
   Plus,
+  BookMarked,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -83,6 +84,10 @@ export default function Navbar({ transparent = false }) {
                   <Heart size={14} />
                   Favorites
                 </NavLink>
+                <NavLink to="/my-bookings" solid={solid}>
+                  <BookMarked size={14} />
+                  My Bookings
+                </NavLink>
               </>
             )}
           </div>
@@ -151,6 +156,10 @@ export default function Navbar({ transparent = false }) {
               <MobileLink to="/favorites">
                 <Heart size={15} />
                 Favorites
+              </MobileLink>
+              <MobileLink to="/my-bookings">
+                <BookMarked size={15} />
+                My Bookings
               </MobileLink>
             </>
           )}
