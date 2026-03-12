@@ -5,23 +5,25 @@ if (process.env.NODE_ENV !== "production") {
 const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
-const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
-const ExpressError = require("./utils/ExpressError");
-const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const User = require("./models/user");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
-//const MongoDBStore = require('connect-mongodb-session')(session);
 const MongoStore = require("connect-mongo");
+const cors = require("cors");
+
+const ExpressError = require("./utils/ExpressError");
+const catchAsync = require("./utils/catchAsync");
+const User = require("./models/user");
 
 const userRoutes = require("./routes/users");
 const campgroundRoutes = require("./routes/campgrounds");
 const reviewRoutes = require("./routes/reviews");
 const favoriteRoutes = require("./routes/favorites");
+const aiRoutes = require("./routes/ai");
+// ─── Database ────────────────────────────────────────────────────────────────
 const dbUrl = process.env.DB_URL;
 
 mongoose.connect(dbUrl, {
@@ -33,88 +35,64 @@ mongoose.connect(dbUrl, {
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
-db.once("open", () => {
-  console.log("Database connected");
-});
+db.once("open", () => console.log("Database connected"));
 
+// ─── App setup ───────────────────────────────────────────────────────────────
 const app = express();
 app.set("trust proxy", 1);
 
-app.engine("ejs", ejsMate);
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "public")));
+// ─── CORS — must be first ─────────────────────────────────────────────────────
 app.use(
-  mongoSanitize({
-    replaceWith: "_",
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CLIENT_URL // set this in prod .env
+        : "http://localhost:5173",
+    credentials: true,
   }),
 );
 
-const secret = process.env.SECRET || "thisshouldbeabettersecret!";
+// ─── Body parsers ─────────────────────────────────────────────────────────────
+app.use(express.json()); // for React API calls
+app.use(express.urlencoded({ extended: true })); // keep for multipart fallback
+app.use(express.static(path.join(__dirname, "public")));
 
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  touchAfter: 24 * 60 * 60, // lazy session update
-  crypto: {
-    secret,
-  },
-});
+// ─── Security ─────────────────────────────────────────────────────────────────
+app.use(mongoSanitize({ replaceWith: "_" }));
 
-store.on("error", function (e) {
-  console.log("SESSION STORE ERROR", e);
-});
-
-const sessionConfig = {
-  store: store,
-  name: "session",
-  secret,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-  },
-};
-
-app.use(session(sessionConfig));
-app.use(flash());
 app.use(helmet());
-
-const scriptSrcUrls = [
-  "https://stackpath.bootstrapcdn.com/",
-  "https://api.tiles.mapbox.com/",
-  "https://api.mapbox.com/",
-  "https://kit.fontawesome.com/",
-  "https://cdnjs.cloudflare.com/",
-  "https://cdn.jsdelivr.net",
-];
-const styleSrcUrls = [
-  "https://kit-free.fontawesome.com/",
-  "https://stackpath.bootstrapcdn.com/",
-  "https://api.mapbox.com/",
-  "https://api.tiles.mapbox.com/",
-  "https://fonts.googleapis.com/",
-  "https://use.fontawesome.com/",
-];
-const connectSrcUrls = [
-  "https://api.mapbox.com/",
-  "https://a.tiles.mapbox.com/",
-  "https://b.tiles.mapbox.com/",
-  "https://events.mapbox.com/",
-];
-const fontSrcUrls = [];
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: [],
-      connectSrc: ["'self'", ...connectSrcUrls],
-      scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
-      styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+      connectSrc: [
+        "'self'",
+        "https://api.mapbox.com/",
+        "https://a.tiles.mapbox.com/",
+        "https://b.tiles.mapbox.com/",
+        "https://events.mapbox.com/",
+        "http://localhost:5173", // Vite dev server
+        "ws://localhost:5173", // Vite HMR websocket
+      ],
+      scriptSrc: [
+        "'unsafe-inline'",
+        "'self'",
+        "https://api.tiles.mapbox.com/",
+        "https://api.mapbox.com/",
+        "https://cdnjs.cloudflare.com/",
+        "https://cdn.jsdelivr.net",
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://api.mapbox.com/",
+        "https://api.tiles.mapbox.com/",
+        "https://fonts.googleapis.com/",
+      ],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com/", // Google Fonts (Fraunces, DM Sans)
+      ],
       workerSrc: ["'self'", "blob:"],
       objectSrc: [],
       imgSrc: [
@@ -124,59 +102,116 @@ app.use(
         "https://res.cloudinary.com/",
         "https://images.unsplash.com/",
       ],
-
-      fontSrc: ["'self'", ...fontSrcUrls],
     },
   }),
 );
 
+// ─── Session ──────────────────────────────────────────────────────────────────
+const secret = process.env.SECRET || "thisshouldbeabettersecret!";
+
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  touchAfter: 24 * 60 * 60,
+  crypto: { secret },
+});
+
+store.on("error", (e) => console.log("SESSION STORE ERROR", e));
+
+app.use(
+  session({
+    store,
+    name: "session",
+    secret,
+    resave: false,
+    saveUninitialized: false, // changed: don't save empty sessions
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  }),
+);
+
+app.use(flash());
+
+// ─── Passport ─────────────────────────────────────────────────────────────────
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  next();
+// ─── Locals middleware (single block) ─────────────────────────────────────────
+app.use(async (req, res, next) => {
+  if (req.path.startsWith("/api/auth")) return next();
+  try {
+    if (req.user && req.user._id) {
+      const freshUser = await User.findById(req.user._id).populate("favorites");
+      res.locals.currentUser = freshUser;
+    } else {
+      res.locals.currentUser = null;
+    }
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
+// ─── Auth API routes (for React frontend) ─────────────────────────────────────
+app.get("/api/auth/me", (req, res) => {
+  if (req.user) return res.json({ user: req.user });
+  res.status(401).json({ user: null });
+});
+
+app.post(
+  "/api/auth/login",
+  passport.authenticate("local", { failWithError: true }),
+  (req, res) => res.json({ user: req.user }),
+  (err, req, res, next) =>
+    res.status(401).json({ message: "Invalid username or password" }),
+);
+
+app.post(
+  "/api/auth/register",
+  catchAsync(async (req, res) => {
+    const { email, username, password } = req.body;
+    const user = new User({ email, username });
+    const registered = await User.register(user, password);
+    req.login(registered, (err) => {
+      if (err) return res.status(500).json({ message: err.message });
+      res.json({ user: registered });
+    });
+  }),
+);
+
+app.get("/api/auth/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie("session");
+    res.json({ message: "Logged out" });
+  });
+});
+
+// ─── App routes ───────────────────────────────────────────────────────────────
 app.use("/", userRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use(favoriteRoutes);
+app.use(aiRoutes);
 
-app.use(async (req, res, next) => {
-  if (req.user) {
-    const freshUser = await User.findById(req.user._id).populate("favorites");
-    res.locals.currentUser = freshUser;
-  } else {
-    res.locals.currentUser = null;
-  }
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  next();
-});
-
-app.get("/", (req, res) => {
-  res.render("home");
-});
-
+// ─── 404 handler ──────────────────────────────────────────────────────────────
 app.all("*", (req, res, next) => {
   next(new ExpressError("Page Not Found", 404));
 });
 
+// ─── Global error handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  const { statusCode = 500 } = err;
-  if (!err.message) err.message = "Oh No, Something Went Wrong!";
-  res.status(statusCode).render("error", { err });
+  const { statusCode = 500, message = "Something went wrong" } = err;
+  res.status(statusCode).json({ error: message });
 });
 
+// ─── Start ────────────────────────────────────────────────────────────────────
 const port = process.env.PORT || 3000;
-
-app.listen(port, () => {
-  console.log(`Serving on port ${port}`);
-});
+app.listen(port, () => console.log(`Serving on port ${port}`));

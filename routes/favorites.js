@@ -3,28 +3,40 @@ const router = express.Router();
 const Campground = require("../models/campground");
 const User = require("../models/user");
 const { isLoggedIn } = require("../middleware");
+const catchAsync = require("../utils/catchAsync");
 
-// ADD / REMOVE FAVORITE (toggle)
-router.post("/campgrounds/:id/favorite", isLoggedIn, async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findById(req.user._id);
+// ─── POST /campgrounds/:id/favorite — toggle favorite ────────────────────────
+router.post(
+  "/campgrounds/:id/favorite",
+  isLoggedIn,
+  catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(req.user._id);
 
-  const isFavorite = user.favorites.some((fav) => fav.equals(id));
+    const isFavorite = user.favorites.some((fav) => fav.equals(id));
 
-  if (isFavorite) {
-    user.favorites.pull(id);
-  } else {
-    user.favorites.push(id);
-  }
+    if (isFavorite) {
+      user.favorites.pull(id);
+    } else {
+      user.favorites.push(id);
+    }
 
-  await user.save();
-  res.redirect(`/campgrounds/${id}`);
-});
+    await user.save();
 
-// VIEW FAVORITES
-router.get("/favorites", isLoggedIn, async (req, res) => {
-  const user = await User.findById(req.user._id).populate("favorites");
-  res.render("favorites/index", { favorites: user.favorites });
-});
+    // Return the fresh user with favorites populated so React can update state
+    const freshUser = await User.findById(req.user._id).populate("favorites");
+    res.json({ user: freshUser });
+  }),
+);
+
+// ─── GET /favorites — view all favorites ─────────────────────────────────────
+router.get(
+  "/favorites",
+  isLoggedIn,
+  catchAsync(async (req, res) => {
+    const user = await User.findById(req.user._id).populate("favorites");
+    res.json({ favorites: user.favorites });
+  }),
+);
 
 module.exports = router;
