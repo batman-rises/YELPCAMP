@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import FavoritesPage from './pages/FavoritesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
+import AdminDashboard from './pages/AdminDashboard'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
@@ -36,6 +37,9 @@ export default function App() {
             } />
             <Route path="my-bookings" element={
               <ProtectedRoute><MyBookingsPage /></ProtectedRoute>
+            } />
+            <Route path="admin" element={
+              <ProtectedRoute><AdminDashboard /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

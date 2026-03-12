@@ -11,6 +11,7 @@ import {
   MapPin,
   Plus,
   BookMarked,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -88,6 +89,12 @@ export default function Navbar({ transparent = false }) {
                   <BookMarked size={14} />
                   My Bookings
                 </NavLink>
+                {currentUser?.role === 'admin' && (
+                  <NavLink to="/admin" solid={solid}>
+                    <Shield size={14} />
+                    Admin
+                  </NavLink>
+                )}
               </>
             )}
           </div>
