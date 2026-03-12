@@ -1,8 +1,8 @@
 const express = require("express");
-const router = require("express").Router();
+const router = express.Router();
 const { isLoggedIn } = require("../middleware");
 
-// POST /api/ai/generate-description
+// POST /ai/generate-description
 router.post("/ai/generate-description", isLoggedIn, async (req, res) => {
   const { title, location } = req.body;
 
@@ -13,20 +13,7 @@ router.post("/ai/generate-description", isLoggedIn, async (req, res) => {
   }
 
   try {
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "grok-3-fast",
-        max_tokens: 300,
-        temperature: 0.8,
-        messages: [
-          {
-            role: "user",
-            content: `Write a vivid, enticing campground description for a camping site called "${title || "this campground"}" located in "${location || "a beautiful natural setting"}".
+    const prompt = `Write a vivid, enticing campground description for a camping site called "${title || "this campground"}" located in "${location || "a beautiful natural setting"}".
 
 The description should:
 - Be 2-3 sentences long
@@ -35,22 +22,30 @@ The description should:
 - Feel warm and inviting to campers
 - Sound authentic, not generic
 
-Return only the description text, no quotes, no labels, no markdown.`,
-          },
-        ],
-      }),
-    });
+Return only the description text, no quotes, no labels, no markdown.`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.8 },
+        }),
+      },
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Grok API error:", data);
+      console.error("Gemini API error:", data);
       return res
         .status(500)
         .json({ message: "AI generation failed. Please try again." });
     }
 
-    const description = data.choices?.[0]?.message?.content?.trim();
+    const description = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!description) {
       return res.status(500).json({ message: "No description generated." });
@@ -64,12 +59,3 @@ Return only the description text, no quotes, no labels, no markdown.`,
 });
 
 module.exports = router;
-
-/**Grok API error: {
-  code: 'Client specified an invalid argument',
-  error: 'Incorrect API key provided: un***ed. You can obtain an API key from https://console.x.ai.'
-}
-Grok API error: {
-  code: 'Client specified an invalid argument',
-  error: 'Incorrect API key provided: un***ed. You can obtain an API key from https://console.x.ai.'
-} */

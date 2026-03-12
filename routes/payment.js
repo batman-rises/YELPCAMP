@@ -14,9 +14,8 @@ const razorpay = new Razorpay({
 });
 
 // ── POST /api/payment/create-order ──────────────────────────────────────────
-// Tourist clicks "Book Now" → we create a Razorpay order for ₹1 (100 paise)
 router.post(
-  "/api/payment/create-order",
+  "/payment/create-order",
   catchAsync(async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "You must be logged in to book" });
@@ -77,9 +76,8 @@ router.post(
 );
 
 // ── POST /api/payment/verify ─────────────────────────────────────────────────
-// Called after tourist pays — we verify the signature & confirm the booking
 router.post(
-  "/api/payment/verify",
+  "/payment/verify",
   catchAsync(async (req, res) => {
     const {
       razorpay_order_id,
@@ -121,7 +119,7 @@ router.post(
 // ── GET /api/bookings/my ─────────────────────────────────────────────────────
 // Tourist can see their own bookings
 router.get(
-  "/api/bookings/my",
+  "/bookings/my",
   catchAsync(async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Not logged in" });
 

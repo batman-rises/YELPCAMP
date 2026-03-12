@@ -11,6 +11,7 @@ const ImageSchema = new Schema({
 });
 
 ImageSchema.virtual('thumbnail').get(function () {
+    if (!this.url) return '';
     return this.url.replace('/upload', '/upload/w_200');
 });
 
@@ -42,14 +43,23 @@ const CampgroundSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Review'
         }
-    ]
+    ],
+    approved: {
+        type: Boolean,
+        default: false
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    }
 }, opts);
 
 
 CampgroundSchema.virtual('properties.popUpMarkup').get(function () {
     return `
     <strong><a href="/campgrounds/${this._id}">${this.title}</a><strong>
-    <p>${this.description.substring(0, 20)}...</p>`
+    <p>${this.description ? this.description.substring(0, 20) : ''}...</p>`
 });
 
 

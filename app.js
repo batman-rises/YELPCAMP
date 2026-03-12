@@ -24,6 +24,7 @@ const reviewRoutes = require("./routes/reviews");
 const favoriteRoutes = require("./routes/favorites");
 const aiRoutes = require("./routes/ai");
 const paymentRoutes = require("./routes/payment");
+const adminRoutes = require("./routes/admin");
 // ─── Database ────────────────────────────────────────────────────────────────
 const dbUrl = process.env.DB_URL;
 
@@ -145,7 +146,16 @@ passport.deserializeUser(User.deserializeUser());
 
 // ─── Locals middleware (single block) ─────────────────────────────────────────
 app.use(async (req, res, next) => {
-  if (req.path.startsWith("/api/auth")) return next();
+  const p = req.path;
+  if (
+    p.startsWith("/api/auth") ||
+    p.startsWith("/api/bookings") ||
+    p.startsWith("/api/payment") ||
+    p.startsWith("/bookings") ||
+    p.startsWith("/payment") ||
+    p.startsWith("/admin")
+  )
+    return next();
   try {
     if (req.user && req.user._id) {
       const freshUser = await User.findById(req.user._id).populate("favorites");
@@ -202,6 +212,7 @@ app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use(favoriteRoutes);
 app.use(aiRoutes);
 app.use(paymentRoutes);
+app.use(adminRoutes);
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────
 app.all("*", (req, res, next) => {

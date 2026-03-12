@@ -7,7 +7,21 @@ module.exports.isLoggedIn = (req, res, next) => {
   if (!req.isAuthenticated()) {
     req.session.returnTo = req.originalUrl;
     req.flash("error", "You must be signed in first!");
-    return res.redirect("/login");
+    return res.status(401).json({ message: "You must be signed in first!" });
+  }
+  next();
+};
+
+module.exports.isAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admins only" });
+  }
+  next();
+};
+
+module.exports.isOwnerOrAdmin = (req, res, next) => {
+  if (!req.user || (req.user.role !== "owner" && req.user.role !== "admin")) {
+    return res.status(403).json({ message: "Camp owners only" });
   }
   next();
 };
