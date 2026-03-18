@@ -1,17 +1,14 @@
-import axios from 'axios'
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || "/api",
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
-})
+  headers: { "Content-Type": "application/json" },
+});
 
 api.interceptors.response.use(
-  res => res,
-  err => {
-    // Let callers handle errors
-    return Promise.reject(err)
-  }
-)
+  (res) => res,
+  (err) => Promise.reject(err),
+);
 
-export default api
+export default api;

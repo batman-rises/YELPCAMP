@@ -1,102 +1,142 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { UserPlus, Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
-import { useToast } from '../context/ToastContext'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
-const BG = 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80'
+const BG =
+  "https://rratsoutdoor.com/cdn/shop/articles/fa260cb2-778c-4ad7-9393-090e0b4fa6d3.jpg?v=1699956506&width=3000";
+//"https://koa.com/content/campgrounds/cave-junction/blogposts/37196blogpostsab9ee025-2690-4875-bd6e-ce503998d2c9.jpg?preset=blogPhoto";
+
+//'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80'
 
 export default function RegisterPage() {
-  const navigate         = useNavigate()
-  const { register }     = useAuth()
-  const { addToast }     = useToast()
-  const [form, setForm]  = useState({ username: '', email: '', password: '' })
-  const [showPw, setShowPw] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  const { addToast } = useToast();
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }))
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
-      await register(form.username, form.email, form.password)
-      addToast(`Welcome to LetsCamp, ${form.username}!`)
-      navigate('/campgrounds')
+      await register(form.username, form.email, form.password);
+      addToast(`Welcome to LetsCamp, ${form.username}!`);
+      navigate("/campgrounds");
     } catch (err) {
-      addToast(err.response?.data?.message || 'Registration failed', 'error')
+      addToast(err.response?.data?.message || "Registration failed", "error");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-
+    <div className="flex-1 flex lg:grid lg:grid-cols-2">
       {/* Left — image */}
-      <div className="hidden lg:block relative">
+      <div className="hidden lg:block relative h-full">
         <img src={BG} alt="Campground" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-l from-[#f7f5f0]/20 to-forest-950/50" />
         <div className="absolute bottom-12 left-12 text-white max-w-xs">
           <p className="font-display text-2xl italic font-light leading-snug">
-            "Not all those who wander are lost — but they do need a good campground."
+            "Not all those who wander are lost — but they do need a good
+            campground."
           </p>
         </div>
       </div>
 
       {/* Right — form */}
-      <div className="flex items-center justify-center p-8 bg-[#f7f5f0]">
+      <div className="flex items-center justify-center p-8 bg-[#f7f5f0] h-full">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <Link to="/" className="font-display text-2xl text-forest-800">LetsCamp</Link>
-            <h1 className="font-display text-3xl text-gray-900 mt-6 mb-1">Create account</h1>
-            <p className="text-gray-500 text-sm">Join thousands of explorers on LetsCamp</p>
+            <Link to="/" className="font-display text-2xl text-forest-800">
+              LetsCamp
+            </Link>
+            <h1 className="font-display text-3xl text-gray-900 mt-6 mb-1">
+              Create account
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Join thousands of explorers on LetsCamp
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Username
+              </label>
               <input
-                type="text" value={form.username} onChange={set('username')}
-                placeholder="explorerName" className="input-field" autoFocus required
+                type="text"
+                value={form.username}
+                onChange={set("username")}
+                placeholder="explorerName"
+                className="input-field"
+                autoFocus
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Email
+              </label>
               <input
-                type="email" value={form.email} onChange={set('email')}
-                placeholder="you@example.com" className="input-field" required
+                type="email"
+                value={form.email}
+                onChange={set("email")}
+                placeholder="you@example.com"
+                className="input-field"
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Password
+              </label>
               <div className="relative">
                 <input
-                  type={showPw ? 'text' : 'password'} value={form.password} onChange={set('password')}
-                  placeholder="••••••••" className="input-field pr-10" required
+                  type={showPw ? "text" : "password"}
+                  value={form.password}
+                  onChange={set("password")}
+                  placeholder="••••••••"
+                  className="input-field pr-10"
+                  required
                 />
-                <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <button
+                  type="button"
+                  onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            <button type="submit" disabled={loading}
-              className="btn-primary mt-2 flex items-center justify-center gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary mt-2 flex items-center justify-center gap-2"
+            >
               <UserPlus size={15} />
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? "Creating account..." : "Create Account"}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-forest-700 font-medium hover:underline">Sign in</Link>
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-forest-700 font-medium hover:underline"
+            >
+              Sign in
+            </Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

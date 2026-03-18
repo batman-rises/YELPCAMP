@@ -13,8 +13,8 @@ export default function Layout() {
       style={{ background: "var(--bg-main)" }}
     >
       <Navbar transparent={isHome} />
-      <main className={`flex-1 ${isHome ? "" : "pt-20"}`}>
-        <div className="page-enter">
+      <main className="flex-1 flex">
+        <div className="page-enter flex-1">
           <Outlet />
         </div>
       </main>

@@ -1,40 +1,44 @@
-import { Link } from 'react-router-dom'
-import { ArrowRight, MapPin, Star, Users, Tent } from 'lucide-react'
+import { Link } from "react-router-dom";
+import { ArrowRight, MapPin, Star, Users, Tent } from "lucide-react";
 
-const HERO_BG = 'https://images.unsplash.com/photo-1500534314209-a26db0f5f2e1?auto=format&fit=crop&w=1920&q=80'
-
+const HERO_BG =
+  "https://visitestonia.com/content-images/502598/a-complete-guide-to-camping-in-estonia-en-001-visit-estonia.jpg";
+//"https://rratsoutdoor.com/cdn/shop/articles/fa260cb2-778c-4ad7-9393-090e0b4fa6d3.jpg?v=1699956506&width=3000";
+//"https://eu.baseus.com/cdn/shop/articles/Everything_you_need_to_know_about_lake_camping.png?v=1712827517";
+//"https://www.treebo.com/blog/wp-content/uploads/2018/04/Night-Camping-near-Mumbai-.jpg";
+//"https://koa.com/content/campgrounds/cave-junction/blogposts/37196blogpostsab9ee025-2690-4875-bd6e-ce503998d2c9.jpg?preset=blogPhoto";
+//"https://www.visitthunderbay.com/en/outdoor-adventure/resources/Camping-Night-photo.jpg";
 const STATS = [
-  { icon: Tent,   label: 'Campgrounds', value: '50+' },
-  { icon: MapPin, label: 'States',      value: '15'  },
-  { icon: Star,   label: 'Reviews',     value: '200+'},
-  { icon: Users,  label: 'Explorers',   value: '1k+' },
-]
+  { icon: Tent, label: "Campgrounds", value: "50+" },
+  { icon: MapPin, label: "States", value: "15" },
+  { icon: Star, label: "Reviews", value: "200+" },
+  { icon: Users, label: "Explorers", value: "1k+" },
+];
 
 const FEATURED = [
   {
-    title: 'Pangong Lake Camp',
-    location: 'Ladakh',
-    img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&q=80',
-    price: '₹3,000',
+    title: "Pangong Lake Camp",
+    location: "Ladakh",
+    img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600&q=80",
+    price: "₹3,000",
   },
   {
-    title: 'Spiti Cold Desert',
-    location: 'Himachal Pradesh',
-    img: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600&q=80',
-    price: '₹2,200',
+    title: "Spiti Cold Desert",
+    location: "Himachal Pradesh",
+    img: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=600&q=80",
+    price: "₹2,200",
   },
   {
-    title: 'Jaisalmer Desert Camp',
-    location: 'Rajasthan',
-    img: 'https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=600&q=80',
-    price: '₹2,500',
+    title: "Jaisalmer Desert Camp",
+    location: "Rajasthan",
+    img: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=600&q=80",
+    price: "₹2,500",
   },
-]
+];
 
 export default function HomePage() {
   return (
     <div className="font-body">
-
       {/* ─── Hero ─── */}
       <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
         {/* Background */}
@@ -46,8 +50,12 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-forest-950/60 via-forest-950/40 to-forest-950/80" />
 
         {/* Grain overlay */}
-        <div className="absolute inset-0 opacity-20"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")" }}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E\")",
+          }}
         />
 
         {/* Content */}
@@ -65,8 +73,8 @@ export default function HomePage() {
           </h1>
 
           <p className="text-white/70 text-lg sm:text-xl max-w-xl mx-auto mb-10 leading-relaxed">
-            From Himalayan valleys to desert dunes — find, review, and share
-            the finest camping spots across India.
+            From Himalayan valleys to desert dunes — find, review, and share the
+            finest camping spots across India.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -101,7 +109,9 @@ export default function HomePage() {
             {STATS.map(({ icon: Icon, label, value }) => (
               <div key={label} className="text-center">
                 <Icon size={20} className="text-sand-400 mx-auto mb-2" />
-                <div className="font-display text-3xl text-white mb-1">{value}</div>
+                <div className="font-display text-3xl text-white mb-1">
+                  {value}
+                </div>
                 <div className="text-white/50 text-sm">{label}</div>
               </div>
             ))}
@@ -112,12 +122,14 @@ export default function HomePage() {
       {/* ─── Featured ─── */}
       <section className="py-20 page-container">
         <div className="mb-12 text-center">
-          <p className="text-forest-600 text-sm font-medium tracking-widest uppercase mb-3">Top Picks</p>
+          <p className="text-forest-600 text-sm font-medium tracking-widest uppercase mb-3">
+            Top Picks
+          </p>
           <h2 className="section-title">Featured Campgrounds</h2>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURED.map(camp => (
+          {FEATURED.map((camp) => (
             <div key={camp.title} className="card card-hover group">
               <div className="overflow-hidden h-52">
                 <img
@@ -129,13 +141,18 @@ export default function HomePage() {
               <div className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-display text-lg text-forest-900">{camp.title}</h3>
+                    <h3 className="font-display text-lg text-forest-900">
+                      {camp.title}
+                    </h3>
                     <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
                       <MapPin size={13} />
                       {camp.location}
                     </div>
                   </div>
-                  <span className="font-semibold text-forest-700 text-sm whitespace-nowrap">{camp.price}<span className="text-gray-400 font-normal">/night</span></span>
+                  <span className="font-semibold text-forest-700 text-sm whitespace-nowrap">
+                    {camp.price}
+                    <span className="text-gray-400 font-normal">/night</span>
+                  </span>
                 </div>
                 <Link
                   to="/campgrounds"
@@ -150,7 +167,10 @@ export default function HomePage() {
         </div>
 
         <div className="text-center mt-12">
-          <Link to="/campgrounds" className="btn-primary inline-flex items-center gap-2">
+          <Link
+            to="/campgrounds"
+            className="btn-primary inline-flex items-center gap-2"
+          >
             View All Campgrounds
             <ArrowRight size={15} />
           </Link>
@@ -165,9 +185,13 @@ export default function HomePage() {
             Know a hidden gem?
           </h2>
           <p className="text-white/60 mb-8 text-lg">
-            Share it with the community and help fellow explorers discover India's best camping spots.
+            Share it with the community and help fellow explorers discover
+            India's best camping spots.
           </p>
-          <Link to="/campgrounds/new" className="inline-flex items-center gap-2 bg-sand-400 hover:bg-sand-300 text-forest-900 font-semibold px-7 py-3.5 rounded-full transition-all">
+          <Link
+            to="/campgrounds/new"
+            className="inline-flex items-center gap-2 bg-sand-400 hover:bg-sand-300 text-forest-900 font-semibold px-7 py-3.5 rounded-full transition-all"
+          >
             Add a Campground
             <ArrowRight size={15} />
           </Link>
@@ -179,5 +203,5 @@ export default function HomePage() {
         &copy; {new Date().getFullYear()} LetsCamp — Crafted for explorers
       </footer>
     </div>
-  )
+  );
 }
