@@ -168,6 +168,12 @@ export default function Navbar({ transparent = false }) {
                 <BookMarked size={15} />
                 My Bookings
               </MobileLink>
+              {currentUser?.role === 'admin' && (
+                <MobileLink to="/admin">
+                  <Shield size={15} />
+                  Admin
+                </MobileLink>
+              )}
             </>
           )}
           <div className="border-t border-white/10 pt-2 mt-1">

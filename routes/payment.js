@@ -131,10 +131,10 @@ router.get(
   }),
 );
 
-// ── GET /api/admin/bookings ──────────────────────────────────────────────────
-// Admin can see ALL bookings
+// ── GET /admin/bookings (legacy — handled by admin.js) ───────────────────────
+// kept here for reference — actual route is in routes/admin.js
 router.get(
-  "/api/admin/bookings",
+  "/admin/bookings",
   catchAsync(async (req, res) => {
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ message: "Admins only" });
