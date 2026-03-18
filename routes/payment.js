@@ -108,6 +108,19 @@ router.post(
       { new: true },
     ).populate("campground");
 
+    // Store booked dates on campground for availability blocking
+    if (booking && booking.campground) {
+      await Campground.findByIdAndUpdate(booking.campground._id, {
+        $push: {
+          bookedDates: {
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            bookingId: booking._id,
+          }
+        }
+      });
+    }
+
     res.json({
       success: true,
       message: "Booking confirmed!",
