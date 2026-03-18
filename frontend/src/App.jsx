@@ -12,6 +12,7 @@ import RegisterPage from './pages/RegisterPage'
 import FavoritesPage from './pages/FavoritesPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import AdminDashboard from './pages/AdminDashboard'
+import OwnerDashboard from './pages/OwnerDashboard'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 
@@ -40,6 +41,9 @@ export default function App() {
             } />
             <Route path="admin" element={
               <ProtectedRoute><AdminDashboard /></ProtectedRoute>
+            } />
+            <Route path="owner" element={
+              <ProtectedRoute><OwnerDashboard /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

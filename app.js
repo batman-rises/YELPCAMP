@@ -25,6 +25,7 @@ const favoriteRoutes = require("./routes/favorites");
 const aiRoutes = require("./routes/ai");
 const paymentRoutes = require("./routes/payment");
 const adminRoutes = require("./routes/admin");
+const ownerRoutes = require("./routes/owner");
 // ─── Database ────────────────────────────────────────────────────────────────
 const dbUrl = process.env.DB_URL;
 
@@ -153,7 +154,9 @@ app.use(async (req, res, next) => {
     p.startsWith("/api/payment") ||
     p.startsWith("/bookings") ||
     p.startsWith("/payment") ||
-    p.startsWith("/admin")
+    p.startsWith("/admin") ||
+    p.startsWith("/owner") ||
+    p.startsWith("/chat")
   )
     return next();
   try {
@@ -213,6 +216,7 @@ app.use(favoriteRoutes);
 app.use(aiRoutes);
 app.use(paymentRoutes);
 app.use(adminRoutes);
+app.use(ownerRoutes);
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────
 app.all("*", (req, res, next) => {

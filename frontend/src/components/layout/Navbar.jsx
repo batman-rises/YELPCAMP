@@ -77,10 +77,6 @@ export default function Navbar({ transparent = false }) {
             </NavLink>
             {currentUser && (
               <>
-                <NavLink to="/campgrounds/new" solid={solid}>
-                  <Plus size={14} />
-                  New Camp
-                </NavLink>
                 <NavLink to="/favorites" solid={solid}>
                   <Heart size={14} />
                   Favorites
@@ -89,7 +85,20 @@ export default function Navbar({ transparent = false }) {
                   <BookMarked size={14} />
                   My Bookings
                 </NavLink>
-                {currentUser?.role === 'admin' && (
+                {(currentUser?.role === "owner" ||
+                  currentUser?.role === "admin") && (
+                  <NavLink to="/owner" solid={solid}>
+                    <Tent size={14} />
+                    My Camps
+                  </NavLink>
+                )}
+                {currentUser?.role === "tourist" && (
+                  <NavLink to="/owner" solid={solid}>
+                    <Plus size={14} />
+                    List Camp
+                  </NavLink>
+                )}
+                {currentUser?.role === "admin" && (
                   <NavLink to="/admin" solid={solid}>
                     <Shield size={14} />
                     Admin
@@ -156,10 +165,6 @@ export default function Navbar({ transparent = false }) {
           </MobileLink>
           {currentUser && (
             <>
-              <MobileLink to="/campgrounds/new">
-                <Plus size={15} />
-                New Campground
-              </MobileLink>
               <MobileLink to="/favorites">
                 <Heart size={15} />
                 Favorites
@@ -168,7 +173,20 @@ export default function Navbar({ transparent = false }) {
                 <BookMarked size={15} />
                 My Bookings
               </MobileLink>
-              {currentUser?.role === 'admin' && (
+              {(currentUser?.role === "owner" ||
+                currentUser?.role === "admin") && (
+                <MobileLink to="/owner">
+                  <Tent size={15} />
+                  My Camps
+                </MobileLink>
+              )}
+              {currentUser?.role === "tourist" && (
+                <MobileLink to="/owner">
+                  <Plus size={15} />
+                  List Camp
+                </MobileLink>
+              )}
+              {currentUser?.role === "admin" && (
                 <MobileLink to="/admin">
                   <Shield size={15} />
                   Admin
