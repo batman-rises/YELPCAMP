@@ -19,6 +19,17 @@ const UserSchema = new Schema({
       ref: "Campground",
     },
   ],
+  subscription: {
+    status: {
+      type: String,
+      enum: ["inactive", "active", "expired"],
+      default: "inactive",
+    },
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+    startDate: Date,
+    endDate: Date,
+  },
 });
 
 UserSchema.plugin(passportLocalMongoose);
