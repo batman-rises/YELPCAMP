@@ -52,7 +52,14 @@ const CampgroundSchema = new Schema({
         type: String,
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
-    }
+    },
+    bookedDates: [
+        {
+            checkIn: Date,
+            checkOut: Date,
+            bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' }
+        }
+    ]
 }, opts);
 
 
