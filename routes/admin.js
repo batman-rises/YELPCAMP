@@ -11,8 +11,7 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-// ── GET /admin/stats ─────────────────────────────────────────────────────────
-router.get("/admin/stats", isAdmin, catchAsync(async (req, res) => {
+router.get("/api/admin/stats", isAdmin, catchAsync(async (req, res) => {
   const [totalUsers, totalCampgrounds, totalBookings, pendingCampgrounds, pendingBookings] =
     await Promise.all([
       User.countDocuments(),
@@ -21,30 +20,19 @@ router.get("/admin/stats", isAdmin, catchAsync(async (req, res) => {
       Campground.countDocuments({ status: "pending" }),
       Booking.countDocuments({ status: "pending" }),
     ]);
-
   const revenue = await Booking.aggregate([
     { $match: { status: "confirmed" } },
     { $group: { _id: null, total: { $sum: "$platformFee" } } },
   ]);
-
-  res.json({
-    totalUsers,
-    totalCampgrounds,
-    totalBookings,
-    pendingCampgrounds,
-    pendingBookings,
-    totalRevenue: revenue[0]?.total || 0,
-  });
+  res.json({ totalUsers, totalCampgrounds, totalBookings, pendingCampgrounds, pendingBookings, totalRevenue: revenue[0]?.total || 0 });
 }));
 
-// ── GET /admin/users ──────────────────────────────────────────────────────────
-router.get("/admin/users", isAdmin, catchAsync(async (req, res) => {
+router.get("/api/admin/users", isAdmin, catchAsync(async (req, res) => {
   const users = await User.find({}).select("-hash -salt").sort({ createdAt: -1 });
   res.json({ users });
 }));
 
-// ── PATCH /admin/users/:id/role ───────────────────────────────────────────────
-router.patch("/admin/users/:id/role", isAdmin, catchAsync(async (req, res) => {
+router.patch("/api/admin/users/:id/role", isAdmin, catchAsync(async (req, res) => {
   const { role } = req.body;
   if (!["tourist", "owner", "admin"].includes(role))
     return res.status(400).json({ message: "Invalid role" });
@@ -52,48 +40,34 @@ router.patch("/admin/users/:id/role", isAdmin, catchAsync(async (req, res) => {
   res.json({ user });
 }));
 
-// ── DELETE /admin/users/:id ───────────────────────────────────────────────────
-router.delete("/admin/users/:id", isAdmin, catchAsync(async (req, res) => {
+router.delete("/api/admin/users/:id", isAdmin, catchAsync(async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: "User deleted" });
 }));
 
-// ── GET /admin/campgrounds ────────────────────────────────────────────────────
-router.get("/admin/campgrounds", isAdmin, catchAsync(async (req, res) => {
+router.get("/api/admin/campgrounds", isAdmin, catchAsync(async (req, res) => {
   const campgrounds = await Campground.find({})
     .populate("author", "username email role")
     .sort({ createdAt: -1 });
   res.json({ campgrounds });
 }));
 
-// ── PATCH /admin/campgrounds/:id/approve ─────────────────────────────────────
-router.patch("/admin/campgrounds/:id/approve", isAdmin, catchAsync(async (req, res) => {
-  const campground = await Campground.findByIdAndUpdate(
-    req.params.id,
-    { status: "approved", approved: true },
-    { new: true }
-  );
+router.patch("/api/admin/campgrounds/:id/approve", isAdmin, catchAsync(async (req, res) => {
+  const campground = await Campground.findByIdAndUpdate(req.params.id, { status: "approved", approved: true }, { new: true });
   res.json({ campground });
 }));
 
-// ── PATCH /admin/campgrounds/:id/reject ──────────────────────────────────────
-router.patch("/admin/campgrounds/:id/reject", isAdmin, catchAsync(async (req, res) => {
-  const campground = await Campground.findByIdAndUpdate(
-    req.params.id,
-    { status: "rejected", approved: false },
-    { new: true }
-  );
+router.patch("/api/admin/campgrounds/:id/reject", isAdmin, catchAsync(async (req, res) => {
+  const campground = await Campground.findByIdAndUpdate(req.params.id, { status: "rejected", approved: false }, { new: true });
   res.json({ campground });
 }));
 
-// ── DELETE /admin/campgrounds/:id ─────────────────────────────────────────────
-router.delete("/admin/campgrounds/:id", isAdmin, catchAsync(async (req, res) => {
+router.delete("/api/admin/campgrounds/:id", isAdmin, catchAsync(async (req, res) => {
   await Campground.findByIdAndDelete(req.params.id);
   res.json({ message: "Campground deleted" });
 }));
 
-// ── GET /admin/bookings ───────────────────────────────────────────────────────
-router.get("/admin/bookings", isAdmin, catchAsync(async (req, res) => {
+router.get("/api/admin/bookings", isAdmin, catchAsync(async (req, res) => {
   const bookings = await Booking.find({})
     .populate("campground", "title location price")
     .populate("tourist", "username email")

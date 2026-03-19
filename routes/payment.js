@@ -15,7 +15,7 @@ const razorpay = new Razorpay({
 
 // ── POST /api/payment/create-order ──────────────────────────────────────────
 router.post(
-  "/payment/create-order",
+  "/api/payment/create-order",
   catchAsync(async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "You must be logged in to book" });
@@ -77,7 +77,7 @@ router.post(
 
 // ── POST /api/payment/verify ─────────────────────────────────────────────────
 router.post(
-  "/payment/verify",
+  "/api/payment/verify",
   catchAsync(async (req, res) => {
     const {
       razorpay_order_id,
@@ -132,7 +132,7 @@ router.post(
 // ── GET /api/bookings/my ─────────────────────────────────────────────────────
 // Tourist can see their own bookings
 router.get(
-  "/bookings/my",
+  "/api/bookings/my",
   catchAsync(async (req, res) => {
     if (!req.user) return res.status(401).json({ message: "Not logged in" });
 
@@ -147,7 +147,7 @@ router.get(
 // ── GET /admin/bookings (legacy — handled by admin.js) ───────────────────────
 // kept here for reference — actual route is in routes/admin.js
 router.get(
-  "/admin/bookings",
+  "/api/admin/bookings",
   catchAsync(async (req, res) => {
     if (!req.user || req.user.role !== "admin") {
       return res.status(403).json({ message: "Admins only" });

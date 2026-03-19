@@ -37,9 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-full grid lg:grid-cols-2">
+    <div className="flex-1 grid lg:grid-cols-2 min-h-0">
       {/* Left — form */}
-      <div className="flex items-center justify-center p-8 bg-[#f7f5f0] h-full">
+      <div className="flex items-center justify-center p-8 bg-[#f7f5f0]">
         <div className="w-full max-w-sm">
           <div className="mb-8">
             <Link to="/" className="font-display text-2xl text-forest-800">
@@ -115,7 +115,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right — image */}
-      <div className="hidden lg:block relative h-full">
+      <div className="hidden lg:block relative">
         <img src={BG} alt="Campground" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#f7f5f0]/20 to-forest-950/40" />
         <div className="absolute bottom-12 left-12 text-white">

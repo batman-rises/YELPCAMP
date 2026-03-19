@@ -47,10 +47,15 @@ app.set("trust proxy", 1);
 // ─── CORS — must be first ─────────────────────────────────────────────────────
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CLIENT_URL // set this in prod .env
-        : "http://localhost:5173",
+    origin: function(origin, callback) {
+      const allowed = [
+        "http://localhost:5173",
+        "http://localhost:4173",
+        process.env.CLIENT_URL,
+      ].filter(Boolean);
+      if (!origin || allowed.includes(origin)) return callback(null, true);
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -148,16 +153,7 @@ passport.deserializeUser(User.deserializeUser());
 // ─── Locals middleware (single block) ─────────────────────────────────────────
 app.use(async (req, res, next) => {
   const p = req.path;
-  if (
-    p.startsWith("/api/auth") ||
-    p.startsWith("/api/bookings") ||
-    p.startsWith("/api/payment") ||
-    p.startsWith("/bookings") ||
-    p.startsWith("/payment") ||
-    p.startsWith("/admin") ||
-    p.startsWith("/owner") ||
-    p.startsWith("/chat")
-  )
+  if (p.startsWith("/api/") || p.startsWith("/health"))
     return next();
   try {
     if (req.user && req.user._id) {
@@ -173,6 +169,9 @@ app.use(async (req, res, next) => {
     next(err);
   }
 });
+
+// ─── Health check (Render keeps service alive) ────────────────────────────────
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // ─── Auth API routes (for React frontend) ─────────────────────────────────────
 app.get("/api/auth/me", (req, res) => {
@@ -210,8 +209,8 @@ app.get("/api/auth/logout", (req, res) => {
 
 // ─── App routes ───────────────────────────────────────────────────────────────
 app.use("/", userRoutes);
-app.use("/campgrounds", campgroundRoutes);
-app.use("/campgrounds/:id/reviews", reviewRoutes);
+app.use("/api/campgrounds", campgroundRoutes);
+app.use("/api/campgrounds/:id/reviews", reviewRoutes);
 app.use(favoriteRoutes);
 app.use(aiRoutes);
 app.use(paymentRoutes);

@@ -1,23 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { isLoggedIn } = require("../middleware");
-const Groq = require("groq-sdk");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
-// ===============================
-//  AI DESCRIPTION ROUTE
-// ===============================
-router.post("/ai/generate-description", isLoggedIn, async (req, res) => {
+router.post("/api/ai/generate-description", isLoggedIn, async (req, res) => {
   const { title, location } = req.body;
-
-  if (!title && !location) {
-    return res
-      .status(400)
-      .json({ message: "Provide at least a title or location." });
-  }
+  if (!title && !location)
+    return res.status(400).json({ message: "Provide at least a title or location." });
 
   try {
     const prompt = `Write a vivid, enticing campground description for a camping site called "${title || "this campground"}" located in "${location || "a beautiful natural setting"}".
@@ -31,19 +19,24 @@ The description should:
 
 Return only the description text, no quotes, no labels, no markdown.`;
 
-    const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.8,
-      max_tokens: 300,
-    });
-
-    const description = response.choices[0]?.message?.content?.trim();
-
-    if (!description) {
-      return res.status(500).json({ message: "No description generated." });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.8 },
+        }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Gemini API error:", data);
+      return res.status(500).json({ message: "AI generation failed. Please try again." });
     }
-
+    const description = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!description) return res.status(500).json({ message: "No description generated." });
     res.json({ description });
   } catch (err) {
     console.error("AI route error:", err);
@@ -51,10 +44,7 @@ Return only the description text, no quotes, no labels, no markdown.`;
   }
 });
 
-// ===============================
-//  CHATBOT ROUTE
-// ===============================
-router.post("/chat", async (req, res) => {
+router.post("/api/chat", async (req, res) => {
   const { message, history = [] } = req.body;
   if (!message) return res.status(400).json({ message: "No message provided" });
 
@@ -69,36 +59,37 @@ You help users with:
 Rules:
 - Keep answers concise, friendly and practical
 - If asked something unrelated to camping/outdoors/travel, politely redirect
-- Use Indian context where relevant
-- Never make up specific booking details or prices
+- Use Indian context where relevant (Indian seasons, locations, gear available in India)
+- Never make up specific booking details or prices for real campgrounds
 
-Be warm, enthusiastic, and helpful.`;
+Be warm, enthusiastic about the outdoors, and helpful.`;
+
+  const contents = [
+    { role: "user", parts: [{ text: systemPrompt + "\n\nAcknowledge you understand your role." }] },
+    { role: "model", parts: [{ text: "Understood! I'm CampBot, ready to help with all things camping and outdoors in India." }] },
+    ...history.map(h => ({ role: h.role === "model" ? "model" : "user", parts: [{ text: h.text }] })),
+    { role: "user", parts: [{ text: message }] },
+  ];
 
   try {
-    const messages = [
-      { role: "system", content: systemPrompt },
-
-      ...history.map((h) => ({
-        role: h.role === "model" ? "assistant" : "user",
-        content: h.text,
-      })),
-
-      { role: "user", content: message },
-    ];
-
-    const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages,
-      temperature: 0.7,
-      max_tokens: 500,
-    });
-
-    const reply = response.choices[0]?.message?.content?.trim();
-
-    if (!reply) {
-      return res.status(500).json({ message: "No response generated." });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents,
+          generationConfig: { maxOutputTokens: 500, temperature: 0.7 },
+        }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Gemini chatbot error:", data);
+      return res.status(500).json({ message: "Chatbot error. Try again." });
     }
-
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!reply) return res.status(500).json({ message: "No response generated." });
     res.json({ reply });
   } catch (err) {
     console.error("Chat route error:", err);

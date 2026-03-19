@@ -7,7 +7,7 @@ const catchAsync = require("../utils/catchAsync");
 
 // ─── POST /campgrounds/:id/favorite — toggle favorite ────────────────────────
 router.post(
-  "/campgrounds/:id/favorite",
+  "/api/campgrounds/:id/favorite",
   isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -31,7 +31,7 @@ router.post(
 
 // ─── GET /favorites — view all favorites ─────────────────────────────────────
 router.get(
-  "/favorites",
+  "/api/favorites",
   isLoggedIn,
   catchAsync(async (req, res) => {
     const user = await User.findById(req.user._id).populate("favorites");
