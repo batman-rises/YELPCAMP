@@ -5,7 +5,9 @@ const { isLoggedIn } = require("../middleware");
 router.post("/api/ai/generate-description", isLoggedIn, async (req, res) => {
   const { title, location } = req.body;
   if (!title && !location)
-    return res.status(400).json({ message: "Provide at least a title or location." });
+    return res
+      .status(400)
+      .json({ message: "Provide at least a title or location." });
 
   try {
     const prompt = `Write a vivid, enticing campground description for a camping site called "${title || "this campground"}" located in "${location || "a beautiful natural setting"}".
@@ -20,23 +22,33 @@ The description should:
 Return only the description text, no quotes, no labels, no markdown.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.8 },
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 300,
+          temperature: 0.8,
         }),
-      }
+      },
     );
+
     const data = await response.json();
     if (!response.ok) {
-      console.error("Gemini API error:", data);
-      return res.status(500).json({ message: "AI generation failed. Please try again." });
+      console.error("Groq API error:", data);
+      return res
+        .status(500)
+        .json({ message: "AI generation failed. Please try again." });
     }
-    const description = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!description) return res.status(500).json({ message: "No description generated." });
+
+    const description = data.choices?.[0]?.message?.content?.trim();
+    if (!description)
+      return res.status(500).json({ message: "No description generated." });
     res.json({ description });
   } catch (err) {
     console.error("AI route error:", err);
@@ -64,32 +76,42 @@ Rules:
 
 Be warm, enthusiastic about the outdoors, and helpful.`;
 
-  const contents = [
-    { role: "user", parts: [{ text: systemPrompt + "\n\nAcknowledge you understand your role." }] },
-    { role: "model", parts: [{ text: "Understood! I'm CampBot, ready to help with all things camping and outdoors in India." }] },
-    ...history.map(h => ({ role: h.role === "model" ? "model" : "user", parts: [{ text: h.text }] })),
-    { role: "user", parts: [{ text: message }] },
+  const messages = [
+    { role: "system", content: systemPrompt },
+    ...history.map((h) => ({
+      role: h.role === "model" ? "assistant" : "user",
+      content: h.text,
+    })),
+    { role: "user", content: message },
   ];
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents,
-          generationConfig: { maxOutputTokens: 500, temperature: 0.7 },
+          model: "llama-3.3-70b-versatile",
+          messages,
+          max_tokens: 500,
+          temperature: 0.7,
         }),
-      }
+      },
     );
+
     const data = await response.json();
     if (!response.ok) {
-      console.error("Gemini chatbot error:", data);
+      console.error("Groq chatbot error:", data);
       return res.status(500).json({ message: "Chatbot error. Try again." });
     }
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (!reply) return res.status(500).json({ message: "No response generated." });
+
+    const reply = data.choices?.[0]?.message?.content?.trim();
+    if (!reply)
+      return res.status(500).json({ message: "No response generated." });
     res.json({ reply });
   } catch (err) {
     console.error("Chat route error:", err);

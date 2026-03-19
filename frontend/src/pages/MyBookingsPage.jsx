@@ -37,7 +37,7 @@ export default function MyBookingsPage() {
 
   useEffect(() => {
     api
-      .get("/api/bookings/my")
+      .get("/bookings/my")
       .then((res) => setBookings(res.data.bookings))
       .catch(() => addToast("Could not load bookings", "error"))
       .finally(() => setLoading(false));
