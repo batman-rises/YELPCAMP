@@ -44,38 +44,6 @@ Find stunning campgrounds, book your spot, and manage everything — all in one 
 
 ---
 
-## 🖼️ Screenshots
-
-<div align="center">
-
-### Home Page
-
-> _Stunning hero with animated entry and campground discovery_
-
-### Campgrounds Index
-
-> _Side-by-side list + sticky interactive map_
-
-### Campground Detail
-
-> _Image carousel, Mapbox location, booking card with date picker_
-
-### CampBot
-
-> _Floating AI assistant — always available on every page_
-
-### Admin Dashboard
-
-> _Full platform management — users, campgrounds, bookings, revenue_
-
-### Owner Dashboard
-
-> _Manage listings and view bookings for your campgrounds_
-
-</div>
-
----
-
 ## 🏗️ Tech Stack
 
 ### Frontend
